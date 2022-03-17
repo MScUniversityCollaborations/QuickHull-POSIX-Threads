@@ -3,6 +3,7 @@
 #include<cstdio>
 #include<vector> //std::vector
 #include<cmath> //sqrt
+#include<pthread.h>
 
 using namespace std; //std::
 
