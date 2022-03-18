@@ -1,10 +1,11 @@
-#include<iostream>
-#include<cstdlib>
-#include<cstdio>
-#include<vector> //std::vector
-#include<cmath> //sqrt
-#include<pthread.h>
-#include<unistd.h>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <vector> //std::vector
+#include <cmath> //sqrt
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
 
 using namespace std; //std::
 
@@ -28,38 +29,6 @@ int taskCount = 0;
 
 pthread_mutex_t mutexQueue;
 pthread_cond_t condQueue;
-
-void executeTask(Task* task) {
-    task->taskFunction(task->arg1, task->arg2);
-}
-
-void submitTask(Task task) {
-    pthread_mutex_lock(&mutexQueue);
-    taskQueue[taskCount] = task;
-    taskCount++;
-    pthread_mutex_unlock(&mutexQueue);
-    pthread_cond_signal(&condQueue);
-}
-
-void* startThread(void* args) {
-    while (1) {
-        Task task;
-
-        pthread_mutex_lock(&mutexQueue);
-        while (taskCount == 0) {
-            pthread_cond_wait(&condQueue, &mutexQueue);
-        }
-
-        task = taskQueue[0];
-        int i;
-        for (i = 0; i < taskCount - 1; i++) {
-            taskQueue[i] = taskQueue[i + 1];
-        }
-        taskCount--;
-        pthread_mutex_unlock(&mutexQueue);
-        executeTask(&task);
-    }
-}
 
 
 /*-------------------- input and output ----------------------*/
@@ -169,7 +138,6 @@ void find_left_set(vector<Point> P, vector<Point>& S, Point p1, Point p2){
 }
 /*-------------------------------------------------------------*/
 
-
 /*-------------------- The QuickHull Algorithm Functions --------------------*/
 /*---------------------------- see reference (0) ----------------------------*/
 void find_hull(vector<Point>& CH, vector<Point>S, Point p1, Point p2){
@@ -228,6 +196,37 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 }
 /*-------------------------------------------------------------*/
 
+void executeTask(Task* task) {
+    task->taskFunction(task->arg1, task->arg2);
+}
+
+void submitTask(Task task) {
+    pthread_mutex_lock(&mutexQueue);
+    taskQueue[taskCount] = task;
+    taskCount++;
+    pthread_mutex_unlock(&mutexQueue);
+    pthread_cond_signal(&condQueue);
+}
+
+void* startThread(void* args) {
+    while (1) {
+        Task task;
+
+        pthread_mutex_lock(&mutexQueue);
+        while (taskCount == 0) {
+            pthread_cond_wait(&condQueue, &mutexQueue);
+        }
+
+        task = taskQueue[0];
+        int i;
+        for (i = 0; i < taskCount - 1; i++) {
+            taskQueue[i] = taskQueue[i + 1];
+        }
+        taskCount--;
+        pthread_mutex_unlock(&mutexQueue);
+        executeTask(&task);
+    }
+}
 
 int main(int argc, char *argv[]){
 	//the input
