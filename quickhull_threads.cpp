@@ -8,14 +8,19 @@
 using namespace std; //std::
 
 #define NUM_THREADS 5
-
-typedef struct Task{
-	int a, b;
+typedef struct Task {
+    void (*taskFunction)(vector<Point>&, vector<Point>);
+    int arg1, arg2;
 } Task;
 
 Task taskQueue[256];
 
-
+void executeTask(Task* task) {
+    task->quick_hull(task->arg1, task->arg2);
+    // usleep(50000);
+    // int result = task->a + task->b;
+    // printf("The sum of %d and %d is %d\n", task->a, task->b, result);
+}
 
 /*----------------- 2D point structure (x,y) ------------------*/
 class Point{
@@ -202,7 +207,36 @@ int main(int argc, char *argv[]){
 	cout << "\n------------- INPUT -------------\n";
 	print_vector_of_points(input);
 
-	quick_hull(convex_hull, input);
+	//quick_hull(convex_hull, input);
+
+	pthread_t th[THREAD_NUM];
+    pthread_mutex_init(&mutexQueue, NULL);
+    pthread_cond_init(&condQueue, NULL);
+    int i;
+    for (i = 0; i < THREAD_NUM; i++) {
+        if (pthread_create(&th[i], NULL, &startThread, NULL) != 0) {
+            perror("Failed to create the thread");
+        }
+    }
+
+    srand(time(NULL));
+    for (i = 0; i < 100; i++) {
+        Task t = {
+            //.taskFunction = i % 2 == 0 ? &sum : &product,
+			.taskFunction = &quick_hull
+            .arg1 = convex_hull,
+            .arg2 = input
+        };
+        submitTask(t);
+    }
+
+    for (i = 0; i < THREAD_NUM; i++) {
+        if (pthread_join(th[i], NULL) != 0) {
+            perror("Failed to join the thread");
+        }
+    }
+    pthread_mutex_destroy(&mutexQueue);
+    pthread_cond_destroy(&condQueue);
 
 	cout << "\n========== CONVEX HULL ==========\n";
 	print_vector_of_points(convex_hull);
