@@ -198,7 +198,7 @@ int main(int argc, char *argv[]){
 	cout << "\n========== CONVEX HULL ==========\n";
 	print_vector_of_points(convex_hull);
 
-	//cleans memory
+	//cleans memmory
 	convex_hull.clear();
 	input.clear();
 

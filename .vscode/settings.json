@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "cstdio": "cpp"
-    }
+        "cstdio": "cpp",
+        "cmath": "cpp",
+        "vector": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

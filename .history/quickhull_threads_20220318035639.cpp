@@ -100,7 +100,7 @@ int set_local(Point a, Point p1, Point p2){
 Point farthest_point(vector<Point> S, Point p1, Point p2){
 	double max_value = 0, aux;
 	Point max_point;
-	// calculates and compares distance of points
+	//caculates and compares distance of points
 	for(auto i = S.begin(); i != S.end(); ++i){
 		aux = line_distance((*i),p1,p2);
 		if(max_value <= aux){
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]){
 	cout << "\n========== CONVEX HULL ==========\n";
 	print_vector_of_points(convex_hull);
 
-	//cleans memory
+	//cleans memmory
 	convex_hull.clear();
 	input.clear();
 
