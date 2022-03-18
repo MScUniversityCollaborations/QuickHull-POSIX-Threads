@@ -17,9 +17,6 @@ Task taskQueue[256];
 
 void executeTask(Task* task) {
     task->quick_hull(task->arg1, task->arg2);
-    // usleep(50000);
-    // int result = task->a + task->b;
-    // printf("The sum of %d and %d is %d\n", task->a, task->b, result);
 }
 
 /*----------------- 2D point structure (x,y) ------------------*/
