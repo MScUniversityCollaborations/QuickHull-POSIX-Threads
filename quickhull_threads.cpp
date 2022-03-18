@@ -14,6 +14,10 @@ typedef struct Task {
 } Task;
 
 Task taskQueue[256];
+int taskCount = 0;
+
+pthread_mutex_t mutexQueue;
+pthread_cond_t condQueue;
 
 void executeTask(Task* task) {
     task->quick_hull(task->arg1, task->arg2);
