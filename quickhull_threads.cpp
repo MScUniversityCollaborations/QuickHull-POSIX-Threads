@@ -4,13 +4,23 @@
 #include<vector> //std::vector
 #include<cmath> //sqrt
 #include<pthread.h>
+#include<unistd.h>
 
 using namespace std; //std::
 
-#define NUM_THREADS 5
+#define THREAD_NUM 4
+
+/*----------------- 2D point structure (x,y) ------------------*/
+class Point{
+    public:
+        double x, y;
+};
+/*------------------------------------------------------------*/
+
 typedef struct Task {
     void (*taskFunction)(vector<Point>&, vector<Point>);
-    int arg1, arg2;
+    vector<Point>& arg1;
+	vector<Point> arg2;
 } Task;
 
 Task taskQueue[256];
@@ -20,15 +30,36 @@ pthread_mutex_t mutexQueue;
 pthread_cond_t condQueue;
 
 void executeTask(Task* task) {
-    task->quick_hull(task->arg1, task->arg2);
+    task->taskFunction(task->arg1, task->arg2);
 }
 
-/*----------------- 2D point structure (x,y) ------------------*/
-class Point{
-    public:
-        double x, y;
-};
-/*------------------------------------------------------------*/
+void submitTask(Task task) {
+    pthread_mutex_lock(&mutexQueue);
+    taskQueue[taskCount] = task;
+    taskCount++;
+    pthread_mutex_unlock(&mutexQueue);
+    pthread_cond_signal(&condQueue);
+}
+
+void* startThread(void* args) {
+    while (1) {
+        Task task;
+
+        pthread_mutex_lock(&mutexQueue);
+        while (taskCount == 0) {
+            pthread_cond_wait(&condQueue, &mutexQueue);
+        }
+
+        task = taskQueue[0];
+        int i;
+        for (i = 0; i < taskCount - 1; i++) {
+            taskQueue[i] = taskQueue[i + 1];
+        }
+        taskCount--;
+        pthread_mutex_unlock(&mutexQueue);
+        executeTask(&task);
+    }
+}
 
 
 /*-------------------- input and output ----------------------*/
@@ -220,7 +251,6 @@ int main(int argc, char *argv[]){
         }
     }
 
-    srand(time(NULL));
     for (i = 0; i < 100; i++) {
         Task t = {
             //.taskFunction = i % 2 == 0 ? &sum : &product,
