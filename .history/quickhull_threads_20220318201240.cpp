@@ -7,8 +7,6 @@
 
 using namespace std; //std::
 
-#define NUM_THREADS 5
-
 typedef struct Task{
 	int a, b;
 } Task;

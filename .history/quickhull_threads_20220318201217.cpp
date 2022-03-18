@@ -7,15 +7,9 @@
 
 using namespace std; //std::
 
-#define NUM_THREADS 5
-
 typedef struct Task{
 	int a, b;
 } Task;
-
-Task taskQueue[256];
-
-
 
 /*----------------- 2D point structure (x,y) ------------------*/
 class Point{
