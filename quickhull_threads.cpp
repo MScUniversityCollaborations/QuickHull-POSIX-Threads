@@ -200,8 +200,6 @@ void find_hull(vector<Point>& CH, vector<Point>S, Point p1, Point p2){
 	find_hull(CH,S2,c,p2);
 }
 
-
-
 pthread_t th[THREAD_NUM];
 
 
