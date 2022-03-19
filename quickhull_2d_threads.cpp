@@ -28,7 +28,7 @@ typedef struct Task {
     void (*taskFunction)(vector<Point> , vector<Point>, Point, Point);
     vector<Point> arg1;
 	vector<Point> arg2;
-	Point arg3;
+	Point argument3;
 	Point arg4;
 } Task;
 
@@ -38,7 +38,7 @@ int taskCount = 0;
 pthread_mutex_t mutexQueue;
 pthread_cond_t condQueue;
 void executeTask(Task* task) {
-    task->taskFunction(task->arg1, task->arg2, task->arg3, task->arg4);
+    task->taskFunction(task->arg1, task->arg2, task->argument3, task->arg4);
 }
 
 void submitTask(Task task) {
@@ -242,7 +242,7 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 			.taskFunction = &find_hull
             .arg1 = CH,
             .arg2 = S1
-			.arg3 = min
+			.argument3 = min
 			.arg4 = max
         };
         submitTask(t);
