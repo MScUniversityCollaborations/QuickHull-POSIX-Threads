@@ -5,7 +5,7 @@
 #include <cmath> //sqrt
 #include <pthread.h>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 
 using namespace std; //std::
 
@@ -49,7 +49,7 @@ void submitTask(Task task) {
     pthread_cond_signal(&condQueue);
 }
 
-void* startThread(void* args) {
+[[noreturn]] void* startThread(void* args) {
     while (1) {
         Task task;
 
@@ -241,8 +241,8 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
             //.taskFunction = i % 2 == 0 ? &sum : &product,
 			.taskFunction = &find_hull
             .arg1 = CH,
-            .arg2 = S1
-			.arg3 = min
+            .arg2 = S1,
+			.arg3 = min,
 			.arg4 = max
         };
         submitTask(t);
