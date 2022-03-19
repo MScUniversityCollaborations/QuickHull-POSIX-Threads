@@ -4,7 +4,6 @@
 #include <vector> //std::vector
 #include <cmath> //sqrt
 #include <pthread.h>
-#include <unistd.h>
 #include <cstring>
 
 using namespace std; //std::
@@ -25,7 +24,7 @@ class Point{
 // } Task;
 
 typedef struct Task {
-    void (*taskFunction)(vector<Point> , vector<Point>, Point, Point);
+    void (*taskFunction)(vector<Point>& , vector<Point>, Point, Point);
     vector<Point> arg1;
 	vector<Point> arg2;
 	Point arg3;
@@ -37,6 +36,7 @@ int taskCount = 0;
 
 pthread_mutex_t mutexQueue;
 pthread_cond_t condQueue;
+
 void executeTask(Task* task) {
     task->taskFunction(task->arg1, task->arg2, task->arg3, task->arg4);
 }
@@ -50,7 +50,7 @@ void submitTask(Task task) {
 }
 
 [[noreturn]] void* startThread(void* args) {
-    while (1) {
+    while (true) {
         Task task;
 
         pthread_mutex_lock(&mutexQueue);
@@ -165,7 +165,7 @@ Point farthest_point(vector<Point> S, Point p1, Point p2){
 	return max_point;
 }
 
-//find the set of points at the left side of a line (defined by two points)
+//find the set of points on the left side of a line (defined by two points)
 void find_left_set(vector<Point> P, vector<Point>& S, Point p1, Point p2){
 	int flag;
 	for(auto i = P.begin(); i != P.end(); ++i){
@@ -200,6 +200,11 @@ void find_hull(vector<Point>& CH, vector<Point>S, Point p1, Point p2){
 	find_hull(CH,S2,c,p2);
 }
 
+
+
+pthread_t th[THREAD_NUM];
+
+
 void quick_hull(vector<Point>& CH, vector<Point> P){
 	// Find points with smallest and biggest value for x (leftmost and rightmost points)
 	Point min = *(P.begin());
@@ -224,14 +229,14 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 	//adds left most point to the convex hull
 	CH.push_back(min); //important to be here due to printing order
 
-	//find_hull(CH,S1,min,max);
+	find_hull(CH,S1,min,max);
 
-	pthread_t th[THREAD_NUM];
-    pthread_mutex_init(&mutexQueue, NULL);
-    pthread_cond_init(&condQueue, NULL);
+
+    pthread_mutex_init(&mutexQueue, nullptr);
+    pthread_cond_init(&condQueue, nullptr);
     int i;
     for (i = 0; i < THREAD_NUM; i++) {
-        if (pthread_create(&th[i], NULL, &startThread, NULL) != 0) {
+        if (pthread_create(&th[i], nullptr, &startThread, nullptr) != 0) {
             perror("Failed to create the thread");
         }
     }
@@ -239,7 +244,7 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
     for (i = 0; i < 100; i++) {
         Task t = {
             //.taskFunction = i % 2 == 0 ? &sum : &product,
-			.taskFunction = &find_hull
+			.taskFunction = &find_hull,
             .arg1 = CH,
             .arg2 = S1,
 			.arg3 = min,
@@ -253,15 +258,19 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
             perror("Failed to join the thread");
         }
     }
+    //adds right most point to the convex hull
+    CH.push_back(max); //important to be here due to printing order
+
+
+	find_hull(CH,S2,max,min);
     pthread_mutex_destroy(&mutexQueue);
     pthread_cond_destroy(&condQueue);
 
-	//adds right most point to the convex hull
-	CH.push_back(max); //important to be here due to printing order
-
-	find_hull(CH,S2,max,min);
 
 	CH.push_back(min); //important to be here due to printing order
+
+
+
 }
 /*-------------------------------------------------------------*/
 
