@@ -136,7 +136,7 @@ double line_distance(Point a, Point p1, Point p2){
 
 
 /*-------------------- auxiliary functions --------------------*/
-// says if a point a is at the left side, right side or ir colinear to the oriented line p1->p2
+// says if a point an is on the left side, right side or ir collinear to the oriented line p1->p2
 // see references (2)
 int set_local(Point a, Point p1, Point p2){
 	//calculates:	p1->p2 x p1->a (the cross product between the vectors)
@@ -231,7 +231,6 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 
 	find_hull(CH,S1,min,max);
 
-
     pthread_mutex_init(&mutexQueue, nullptr);
     pthread_cond_init(&condQueue, nullptr);
     int i;
@@ -241,30 +240,41 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
         }
     }
 
-    for (i = 0; i < 100; i++) {
-        Task t = {
+    Task t = {
             //.taskFunction = i % 2 == 0 ? &sum : &product,
-			.taskFunction = &find_hull,
+            .taskFunction = &find_hull,
             .arg1 = CH,
             .arg2 = S1,
-			.arg3 = min,
-			.arg4 = max
-        };
-        submitTask(t);
-    }
+            .arg3 = min,
+            .arg4 = max
+    };
+    submitTask(t);
+
+//    for (i = 0; i < 100; i++) {
+//        Task t = {
+//                //.taskFunction = i % 2 == 0 ? &sum : &product,
+//                .taskFunction = &find_hull,
+//                .arg1 = CH,
+//                .arg2 = S1,
+//                .arg3 = min,
+//                .arg4 = max
+//        };
+//        submitTask(t);
+//    }
 
     for (i = 0; i < THREAD_NUM; i++) {
-        if (pthread_join(th[i], NULL) != 0) {
+        if (pthread_join(th[i], nullptr) != 0) {
             perror("Failed to join the thread");
         }
     }
     //adds right most point to the convex hull
     CH.push_back(max); //important to be here due to printing order
 
-
-	find_hull(CH,S2,max,min);
     pthread_mutex_destroy(&mutexQueue);
     pthread_cond_destroy(&condQueue);
+
+
+	find_hull(CH,S2,max,min);
 
 
 	CH.push_back(min); //important to be here due to printing order

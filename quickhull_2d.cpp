@@ -9,8 +9,7 @@
 			https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
 		-(2)HOW TO CALCULATE ON WICH SIDE OF A LINE A GIVEN POINT IS LOCATED:
 			https://math.stackexchange.com/questions/274712/calculate-on-which-side-of-a-straight-line-is-a-given-point-located
-*//*
-
+*/
 
 #include<iostream>
 #include<cstdlib>
@@ -21,21 +20,15 @@
 using namespace std; //std::
 
 
-*/
-/*----------------- 2D point structure (x,y) ------------------*//*
-
+/*----------------- 2D point structure (x,y) ------------------*/
 class Point{
     public:
         double x, y;
 };
-*/
-/*------------------------------------------------------------*//*
+/*------------------------------------------------------------*/
 
 
-
-*/
-/*-------------------- input and output ----------------------*//*
-
+/*-------------------- input and output ----------------------*/
 void get_input(vector<Point> &p){
     Point aux; //does the pushback
     //fill the vector from a input file (syntax of a line: double double)
@@ -52,14 +45,10 @@ void print_vector_of_points(vector<Point> &p){
 	}
 	cout << "=================================\n";
 }
-*/
-/*-------------------------------------------------------------*//*
+/*-------------------------------------------------------------*/
 
 
-
-*/
-/*--------------------- Point operations ----------------------*//*
-
+/*--------------------- Point operations ----------------------*/
 // sums two vectors
 Point vector_sum(Point a, Point b){
 	Point sum;
@@ -101,14 +90,10 @@ double euclidean_distance(Point a, Point b){
 double line_distance(Point a, Point p1, Point p2){
 	return(abs(((p2.y - p1.y)*a.x)-((p2.x - p1.x)*a.y)+(p2.x * p1.y)-(p2.y * p1.x))/euclidean_distance(p1,p2));
 }
-*/
-/*-------------------------------------------------------------*//*
+/*-------------------------------------------------------------*/
 
 
-
-*/
-/*-------------------- auxiliary functions --------------------*//*
-
+/*-------------------- auxiliary functions --------------------*/
 // says if a point a is at the left side, right side or ir colinear to the oriented line p1->p2
 // see references (2)
 int set_local(Point a, Point p1, Point p2){
@@ -148,17 +133,11 @@ void find_left_set(vector<Point> P, vector<Point>& S, Point p1, Point p2){
 		}
 	}
 }
-*/
-/*-------------------------------------------------------------*//*
+/*-------------------------------------------------------------*/
 
 
-
-*/
-/*-------------------- The QuickHull Algorithm Functions --------------------*//*
-
-*/
-/*---------------------------- see reference (0) ----------------------------*//*
-
+/*-------------------- The QuickHull Algorithm Functions --------------------*/
+/*---------------------------- see reference (0) ----------------------------*/
 void find_hull(vector<Point>& CH, vector<Point>S, Point p1, Point p2){
 	//creates two regions
 	vector<Point> S1,S2;
@@ -198,24 +177,22 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 
 	//S1: points at the left of line min->max
 	find_left_set(P,S1,min,max);
-	//S2: points at the left of line max->min 
+	//S2: points at the left of line max->min
 	find_left_set(P,S2,max,min);
 
-	//adds left most point to the convex hull 
+	//adds left most point to the convex hull
 	CH.push_back(min); //important to be here due to printing order
 
 	find_hull(CH,S1,min,max);
 
-	//adds right most point to the convex hull 
+	//adds right most point to the convex hull
 	CH.push_back(max); //important to be here due to printing order
 
 	find_hull(CH,S2,max,min);
 
 	CH.push_back(min); //important to be here due to printing order
 }
-*/
-/*-------------------------------------------------------------*//*
-
+/*-------------------------------------------------------------*/
 
 
 int main(int argc, char *argv[]){
@@ -241,4 +218,3 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-*/
