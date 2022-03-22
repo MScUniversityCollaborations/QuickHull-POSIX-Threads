@@ -4,11 +4,10 @@
 #include <vector> //std::vector
 #include <cmath> //sqrt
 #include <pthread.h>
-#include <cstring>
 
 using namespace std; //std::
 
-#define THREAD_NUM 4
+//#define THREAD_NUM 4
 
 /*----------------- 2D point structure (x,y) ------------------*/
 class Point{
@@ -17,63 +16,58 @@ class Point{
 };
 /*------------------------------------------------------------*/
 
-// typedef struct Task {
-//     void (*taskFunction)(vector<Point>&, vector<Point>);
-//     vector<Point>& arg1;
-// 	vector<Point> arg2;
-// } Task;
-
-typedef struct Task {
-    void (*taskFunction)(vector<Point>& , vector<Point>, Point, Point);
-    vector<Point> arg1;
-	vector<Point> arg2;
-	Point arg3;
-	Point arg4;
-} Task;
-
-Task taskQueue[256];
-int taskCount = 0;
-
-pthread_mutex_t mutexQueue;
-pthread_cond_t condQueue;
-
-void executeTask(Task* task) {
-    task->taskFunction(task->arg1, task->arg2, task->arg3, task->arg4);
-}
-
-void submitTask(Task task) {
-    pthread_mutex_lock(&mutexQueue);
-    taskQueue[taskCount] = task;
-    taskCount++;
-    pthread_mutex_unlock(&mutexQueue);
-    pthread_cond_signal(&condQueue);
-}
-
-[[noreturn]] void* startThread(void* args) {
-    while (true) {
-        Task task;
-
-        pthread_mutex_lock(&mutexQueue);
-        while (taskCount == 0) {
-            pthread_cond_wait(&condQueue, &mutexQueue);
-        }
-
-        task = taskQueue[0];
-        int i;
-        for (i = 0; i < taskCount - 1; i++) {
-            taskQueue[i] = taskQueue[i + 1];
-        }
-        taskCount--;
-        pthread_mutex_unlock(&mutexQueue);
-        executeTask(&task);
-    }
-}
-
+//typedef struct Task {
+//    void (*taskFunction)(vector<Point>& , vector<Point>, Point, Point){};
+//    vector<Point> arg1;
+//	vector<Point> arg2;
+//	Point arg3;
+//	Point arg4;
+//
+//} Task;
+//
+//
+//Task taskQueue[256];
+//int taskCount = 0;
+//
+//pthread_mutex_t mutexQueue;
+//pthread_cond_t condQueue;
+//
+//void executeTask(Task* task) {
+//    task->taskFunction(task->arg1, task->arg2, task->arg3, task->arg4);
+//}
+//
+//void submitTask(Task task) {
+//    pthread_mutex_lock(&mutexQueue);
+//    taskQueue[taskCount] = task;
+//    taskCount++;
+//    pthread_mutex_unlock(&mutexQueue);
+//    pthread_cond_signal(&condQueue);
+//}
+//
+//[[noreturn]] void* startThread(void* args) {
+//    while (true) {
+//        Task task;
+//
+//        pthread_mutex_lock(&mutexQueue);
+//        while (taskCount == 0) {
+//            pthread_cond_wait(&condQueue, &mutexQueue);
+//        }
+//
+//        task = taskQueue[0];
+//        int i;
+//        for (i = 0; i < taskCount - 1; i++) {
+//            taskQueue[i] = taskQueue[i + 1];
+//        }
+//        taskCount--;
+//        pthread_mutex_unlock(&mutexQueue);
+//        executeTask(&task);
+//    }
+//}
 
 /*-------------------- input and output ----------------------*/
 void get_input(vector<Point> &p){
-    Point aux; //does the pushback
-    //fill the vector from a input file (syntax of a line: double double)
+    Point aux{}; //does the pushback
+    //fill the vector from an input file (syntax of a line: double double)
     while (fscanf(stdin, "%lf", &aux.x) != EOF) {    // read a double: x coordinate
 	    getc(stdin);                             // read a single space character
 	    fscanf(stdin, "%lf", &aux.y);            // read a double: y coordinate
@@ -82,18 +76,17 @@ void get_input(vector<Point> &p){
 }
 
 void print_vector_of_points(vector<Point> &p){
-	for(auto i = p.begin(); i != p.end(); ++i){
-		cout << (*i).x << " " << (*i).y << "\n";
+	for(auto & i : p){
+		cout << i.x << " " << i.y << "\n";
 	}
 	cout << "=================================\n";
 }
 /*-------------------------------------------------------------*/
 
-
 /*--------------------- Point operations ----------------------*/
 // sums two vectors
 Point vector_sum(Point a, Point b){
-	Point sum;
+	Point sum{};
 	sum.x = a.x + b.x;
 	sum.y = a.y + b.y;
 	return sum;
@@ -101,7 +94,7 @@ Point vector_sum(Point a, Point b){
 
 // the product of a vector by a scalar
 Point scalar_product(double l, Point a){
-	Point product;
+	Point product{};
 	product.x = l * a.x;
 	product.y = l * a.y;
 	return product;
@@ -134,7 +127,6 @@ double line_distance(Point a, Point p1, Point p2){
 }
 /*-------------------------------------------------------------*/
 
-
 /*-------------------- auxiliary functions --------------------*/
 // says if a point an is on the left side, right side or ir collinear to the oriented line p1->p2
 // see references (2)
@@ -151,27 +143,27 @@ int set_local(Point a, Point p1, Point p2){
 }
 
 //returns the farthest point from a Set of points and a line (defined by two points)
-Point farthest_point(vector<Point> S, Point p1, Point p2){
+Point farthest_point(const vector<Point>& S, Point p1, Point p2){
 	double max_value = 0, aux;
-	Point max_point;
+	Point max_point{};
 	// calculates and compares distance of points
-	for(auto i = S.begin(); i != S.end(); ++i){
-		aux = line_distance((*i),p1,p2);
+	for(auto & i : S){
+		aux = line_distance(i,p1,p2);
 		if(max_value <= aux){
 			max_value = aux;
-			max_point = (*i);
+			max_point = i;
 		}
 	}
 	return max_point;
 }
 
 //find the set of points on the left side of a line (defined by two points)
-void find_left_set(vector<Point> P, vector<Point>& S, Point p1, Point p2){
+void find_left_set(const vector<Point>& P, vector<Point>& S, Point p1, Point p2){
 	int flag;
-	for(auto i = P.begin(); i != P.end(); ++i){
-		flag = set_local((*i),p1,p2);
+	for(auto & i : P){
+		flag = set_local(i,p1,p2);
 		if(flag==1){
-			S.push_back(*i);
+			S.push_back(i);
 		}
 	}
 }
@@ -179,11 +171,11 @@ void find_left_set(vector<Point> P, vector<Point>& S, Point p1, Point p2){
 
 /*-------------------- The QuickHull Algorithm Functions --------------------*/
 /*---------------------------- see reference (0) ----------------------------*/
-void find_hull(vector<Point>& CH, vector<Point>S, Point p1, Point p2){
+void find_hull(vector<Point>& CH, const vector<Point>&S, Point p1, Point p2){
 	//creates two regions
 	vector<Point> S1,S2;
 	//the farthest point
-	Point c;
+	Point c{};
 
 	//if S is empty there's no hull to be found
 	if(S.empty()) return;
@@ -200,20 +192,17 @@ void find_hull(vector<Point>& CH, vector<Point>S, Point p1, Point p2){
 	find_hull(CH,S2,c,p2);
 }
 
-pthread_t th[THREAD_NUM];
-
-
 void quick_hull(vector<Point>& CH, vector<Point> P){
 	// Find points with smallest and biggest value for x (leftmost and rightmost points)
 	Point min = *(P.begin());
 	Point max = *(P.begin());
 
-	for (auto i = P.begin(); i != P.end(); i++) {
-		if ((*i).x < min.x) {
-			min = *i;
+	for (auto & i : P) {
+		if (i.x < min.x) {
+			min = i;
 		}
-		if ((*i).x > max.x) {
-			max = *i;
+		if (i.x > max.x) {
+			max = i;
 		}
 	}
 
@@ -229,24 +218,23 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 
 	find_hull(CH,S1,min,max);
 
-    pthread_mutex_init(&mutexQueue, nullptr);
-    pthread_cond_init(&condQueue, nullptr);
-    int i;
-    for (i = 0; i < THREAD_NUM; i++) {
-        if (pthread_create(&th[i], nullptr, &startThread, nullptr) != 0) {
-            perror("Failed to create the thread");
-        }
-    }
+    CH.push_back(max); //important to be here due to printing order
 
-    Task t = {
-            //.taskFunction = i % 2 == 0 ? &sum : &product,
-            .taskFunction = &find_hull,
-            .arg1 = CH,
-            .arg2 = S1,
-            .arg3 = min,
-            .arg4 = max
-    };
-    submitTask(t);
+    //adds right most point to the convex hull
+    find_hull(CH,S2,max,min);
+
+    CH.push_back(min); //important to be here due to printing order
+
+//    pthread_t th[THREAD_NUM];
+//    pthread_mutex_init(&mutexQueue, nullptr);
+//    pthread_cond_init(&condQueue, nullptr);
+
+//    int i;
+//    for (i = 0; i < THREAD_NUM; i++) {
+//        if (pthread_create(&th[i], nullptr, &startThread, nullptr) != 0) {
+//            perror("Failed to create the thread");
+//        }
+//    }
 
 //    for (i = 0; i < 100; i++) {
 //        Task t = {
@@ -260,30 +248,31 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 //        submitTask(t);
 //    }
 
-    for (i = 0; i < THREAD_NUM; i++) {
-        if (pthread_join(th[i], nullptr) != 0) {
-            perror("Failed to join the thread");
-        }
-    }
-    //adds right most point to the convex hull
-    CH.push_back(max); //important to be here due to printing order
+//    Task t2 = {
+//            //.taskFunction = i % 2 == 0 ? &sum : &product,
+//            .taskFunction = &find_hull,
+//            .arg1 = CH,
+//            .arg2 = S2,
+//            .arg3 = max,
+//            .arg4 = min
+//
+//    };
+// submitTask(t2);
 
-    pthread_mutex_destroy(&mutexQueue);
-    pthread_cond_destroy(&condQueue);
+//    for (i = 0; i < THREAD_NUM; i++) {
+//        if (pthread_join(th[i], nullptr) != 0) {
+//            perror("Failed to join the thread");
+//        }
+//    }
 
-
-	find_hull(CH,S2,max,min);
-
-
-	CH.push_back(min); //important to be here due to printing order
-
-
+//    pthread_mutex_destroy(&mutexQueue);
+//    pthread_cond_destroy(&condQueue);
 
 }
 /*-------------------------------------------------------------*/
 
 
-int main(int argc, char *argv[]){
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]){
 	//the input
 	vector<Point> input;
 	//the convex hull (output)
