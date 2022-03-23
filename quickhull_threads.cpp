@@ -7,7 +7,7 @@
 
 using namespace std; //std::
 
-//#define THREAD_NUM 4
+//#define THREAD_NUM 4 // ποσότητα threads
 
 /*----------------- 2D point structure (x,y) ------------------*/
 class Point{
@@ -16,53 +16,59 @@ class Point{
 };
 /*------------------------------------------------------------*/
 
-//typedef struct Task {
-//    void (*taskFunction)(vector<Point>& , vector<Point>, Point, Point){};
-//    vector<Point> arg1;
-//	vector<Point> arg2;
-//	Point arg3;
-//	Point arg4;
-//
-//} Task;
-//
-//
-//Task taskQueue[256];
-//int taskCount = 0;
-//
-//pthread_mutex_t mutexQueue;
-//pthread_cond_t condQueue;
-//
-//void executeTask(Task* task) {
-//    task->taskFunction(task->arg1, task->arg2, task->arg3, task->arg4);
-//}
-//
-//void submitTask(Task task) {
-//    pthread_mutex_lock(&mutexQueue);
-//    taskQueue[taskCount] = task;
-//    taskCount++;
-//    pthread_mutex_unlock(&mutexQueue);
-//    pthread_cond_signal(&condQueue);
-//}
-//
-//[[noreturn]] void* startThread(void* args) {
-//    while (true) {
-//        Task task;
-//
-//        pthread_mutex_lock(&mutexQueue);
-//        while (taskCount == 0) {
-//            pthread_cond_wait(&condQueue, &mutexQueue);
-//        }
-//
-//        task = taskQueue[0];
-//        int i;
-//        for (i = 0; i < taskCount - 1; i++) {
-//            taskQueue[i] = taskQueue[i + 1];
-//        }
-//        taskCount--;
-//        pthread_mutex_unlock(&mutexQueue);
-//        executeTask(&task);
-//    }
-//}
+/*typedef struct Task {
+    void (*taskFunction)(vector<Point>& , vector<Point>, Point, Point){};
+    vector<Point> arg1;
+	vector<Point> arg2;
+	Point arg3;
+	Point arg4;
+
+} Task;
+
+Task taskQueue[256];
+int taskCount = 0;
+
+pthread_mutex_t mutexQueue; //μεταβλητή αμοιβαίου αποκλεισμού
+pthread_cond_t condQueue; // μεταβλητή condition
+
+void executeTask(Task* task) { //για εκτέλεση task
+    task->taskFunction(task->arg1, task->arg2, task->arg3, task->arg4);
+}
+
+void submitTask(Task task) {
+    // επειδή έχουμε να κάνουμε με multi-thread κλειώνουμε και ξεκλειδώνουμε την μεταβλητή
+    pthread_mutex_lock(&mutexQueue);
+    taskQueue[taskCount] = task;
+    taskCount++; // αύξηση μετρητη κατά ένα Task
+    pthread_mutex_unlock(&mutexQueue);
+    pthread_cond_signal(&condQueue); // σηματοδοτούμε ότι μπήκε task στην ουρά
+}
+
+[[noreturn]] void* startThread(void* args) {
+    while (true) {
+        Task task;
+
+        pthread_mutex_lock(&mutexQueue); // Κλείδωμα μεταβλητής αμοιβαίου αποκλεισμού
+
+        // έλεγχος ένα υπάρχει κάποιο tasκ
+        // ώσπου το taskCount είναι μηδέν τότε δεν υπάρχει
+        while (taskCount == 0) {
+            // έτσι περίμενα μέχρι να υπάρξει
+            pthread_cond_wait(&condQueue, &mutexQueue);
+        } // αυτό γίνεται για να μην υπάρχει σπατάλη των πόρων μας
+
+        task = taskQueue[0]; // πέρνουμε το πρώτο στοιχείο από την ουρά
+        int i;
+             μετακινούμε τα πάντα μία θέση αριστερά μέσω του for
+             πχ: 1 2 3 4 5 θα γίνει 2 3 4 5
+        for (i = 0; i < taskCount - 1; i++) {
+            taskQueue[i] = taskQueue[i + 1];
+        }
+        taskCount--; // αφαιρούμε ένα task εφόσον έχουμε πάρει ενα Task από την ουρά
+        pthread_mutex_unlock(&mutexQueue); // Ξεκλείδωμα μεταβλητής αμοιβαίου αποκλεισμού
+        executeTask(&task); // Εντολή εκτέλεσης του Task
+    }
+}*/
 
 /*-------------------- input and output ----------------------*/
 void get_input(vector<Point> &p){
@@ -225,48 +231,53 @@ void quick_hull(vector<Point>& CH, vector<Point> P){
 
     CH.push_back(min); //important to be here due to printing order
 
-//    pthread_t th[THREAD_NUM];
-//    pthread_mutex_init(&mutexQueue, nullptr);
-//    pthread_cond_init(&condQueue, nullptr);
+/*
+    pthread_t th[THREAD_NUM]; // αρχικοποίηση thread (ποσά threads θα έχω)
+    pthread_mutex_init(&mutexQueue, nullptr); //αρχικοποίηση mutex
+    pthread_cond_init(&condQueue, nullptr); // αρχικοποίηση cond
 
-//    int i;
-//    for (i = 0; i < THREAD_NUM; i++) {
-//        if (pthread_create(&th[i], nullptr, &startThread, nullptr) != 0) {
-//            perror("Failed to create the thread");
-//        }
-//    }
+    int i;
 
-//    for (i = 0; i < 100; i++) {
-//        Task t = {
-//                //.taskFunction = i % 2 == 0 ? &sum : &product,
-//                .taskFunction = &find_hull,
-//                .arg1 = CH,
-//                .arg2 = S1,
-//                .arg3 = min,
-//                .arg4 = max
-//        };
-//        submitTask(t);
-//    }
+    for (i = 0; i < THREAD_NUM; i++) {
+        if (pthread_create(&th[i], nullptr, &startThread, nullptr) != 0) {
+            perror("Failed to create the thread");
+        }
+    }
 
-//    Task t2 = {
-//            //.taskFunction = i % 2 == 0 ? &sum : &product,
-//            .taskFunction = &find_hull,
-//            .arg1 = CH,
-//            .arg2 = S2,
-//            .arg3 = max,
-//            .arg4 = min
-//
-//    };
-// submitTask(t2);
+    // Δημιουργία 100 tasks για την πρώτη αναδρομή
+    for (i = 0; i < 100; i++) {
+        Task t = {
+                .taskFunction = &find_hull, // συνάρτηση find_hull με τα ορίσματα της
+                .arg1 = CH,
+                .arg2 = S1,
+                .arg3 = min,
+                .arg4 = max
+        };
+        submitTask(t); // καταχώρηση Task
+    }
 
-//    for (i = 0; i < THREAD_NUM; i++) {
-//        if (pthread_join(th[i], nullptr) != 0) {
-//            perror("Failed to join the thread");
-//        }
-//    }
+    // Δημιουργία 100 tasks για την δεύτερη αναδρομή
+    Task t2 = {
+            //.taskFunction = i % 2 == 0 ? &sum : &product,
+            .taskFunction = &find_hull,
+            .arg1 = CH,
+            .arg2 = S2,
+            .arg3 = max,
+            .arg4 = min
 
-//    pthread_mutex_destroy(&mutexQueue);
-//    pthread_cond_destroy(&condQueue);
+    };
+    submitTask(t2);
+
+    for (i = 0; i < THREAD_NUM; i++) {
+        if (pthread_join(th[i], nullptr) != 0) {
+            perror("Failed to join the thread");
+        }
+    }
+
+    pthread_mutex_destroy(&mutexQueue); // καταστροφή mutex
+    pthread_cond_destroy(&condQueue); // καταστροφή cond
+
+    */
 
 }
 /*-------------------------------------------------------------*/
