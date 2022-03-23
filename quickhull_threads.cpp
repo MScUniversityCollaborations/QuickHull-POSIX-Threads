@@ -28,7 +28,7 @@ class Point{
 Task taskQueue[256];
 int taskCount = 0;
 
-pthread_mutex_t mutexQueue; //μεταβλητή αμοιβαίου αποκλεισμού
+pthread_mutex_t mutexQueue; // Μεταβλητή αμοιβαίου αποκλεισμού
 pthread_cond_t condQueue; // μεταβλητή condition
 
 void executeTask(Task* task) { //για εκτέλεση task
@@ -36,12 +36,12 @@ void executeTask(Task* task) { //για εκτέλεση task
 }
 
 void submitTask(Task task) {
-    // επειδή έχουμε να κάνουμε με multi-thread κλειώνουμε και ξεκλειδώνουμε την μεταβλητή
+    // Επειδή έχουμε να κάνουμε με multi-thread κλειώνουμε και ξεκλειδώνουμε την μεταβλητή
     pthread_mutex_lock(&mutexQueue);
     taskQueue[taskCount] = task;
-    taskCount++; // αύξηση μετρητη κατά ένα Task
+    taskCount++; // Αύξηση μετρητη κατά ένα Task
     pthread_mutex_unlock(&mutexQueue);
-    pthread_cond_signal(&condQueue); // σηματοδοτούμε ότι μπήκε task στην ουρά
+    pthread_cond_signal(&condQueue); // Σηματοδοτούμε ότι μπήκε task στην ουρά
 }
 
 [[noreturn]] void* startThread(void* args) {
@@ -64,7 +64,7 @@ void submitTask(Task task) {
         for (i = 0; i < taskCount - 1; i++) {
             taskQueue[i] = taskQueue[i + 1];
         }
-        taskCount--; // αφαιρούμε ένα task εφόσον έχουμε πάρει ενα Task από την ουρά
+        taskCount--; // Aφαιρούμε ένα task εφόσον έχουμε πάρει ενα Task από την ουρά
         pthread_mutex_unlock(&mutexQueue); // Ξεκλείδωμα μεταβλητής αμοιβαίου αποκλεισμού
         executeTask(&task); // Εντολή εκτέλεσης του Task
     }
